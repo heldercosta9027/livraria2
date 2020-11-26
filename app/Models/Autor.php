@@ -13,6 +13,14 @@ class Autor extends Model
     /*public function livros(){
         return $this->hasMany('App\Models\Livro','id_autor');
     }*/
+     protected $fillable=[
+        'nome',
+        'nacionalidade',
+        'data_nascimento',
+        'fotografia'
+     ];
+    
+    
     public function livros(){
         return $this->belongsToMany(
             'App\Models\Livro',
