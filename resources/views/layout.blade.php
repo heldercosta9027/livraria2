@@ -3,6 +3,13 @@
 <head>
     <meta charset="utf-8"/>
     <title>@yield('titulo-pagina')</title>
+    
+    @if(session()->has('mensagem'))
+        <div class="alert alert-danger" role="alert">
+            {{session('mensagem')}}
+        </div>
+        @endif
+    
     <link rel="stylesheet" href="{{asset('css/bootstrap.min.css')}}">
     <link rel="stylesheet" href="{{asset('css/all.min.css')}}">
 

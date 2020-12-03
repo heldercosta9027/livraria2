@@ -69,4 +69,7 @@ class AutoresController extends Controller
             'ida'=>$autor->id_autor
             ]);
     }
+    
+    
+        
 }

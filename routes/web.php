@@ -63,6 +63,12 @@ Route::get('/livros/{id}/edit','App\Http\Controllers\LivrosController@edit')
 Route::patch('/livros/{id}/update','App\Http\Controllers\LivrosController@update')
     ->name('livros.update');
 
+Route::get('/livros/{id}/delete','App\Http\Controllers\LivrosController@delete')
+    ->name('livros.delete');
+
+Route::delete('/livros','App\Http\Controllers\LivrosController@destroy')
+    ->name('livros.destroy');
+
 
 
 Route::get('/autores/create','App\Http\Controllers\AutoresController@create')
