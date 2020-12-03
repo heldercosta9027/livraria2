@@ -66,4 +66,29 @@ class EditorasController extends Controller
             'ide'=>$editora->id_editora
             ]);
     }
+    public function delete(Request $r){
+        $editora = Editora::where ('id_editora', $r->ide)->first();
+        if(is_null($editora)){
+            return redirect()->route('editoras.index')
+                ->with('msg', 'A editora não existe');
+        }
+        else
+        {
+          return view('editoras.delete',['editora'=>$editora]);  
+        }
+    }
+    public function destroy(Request $r){
+        $editora = Editora::where ('id_editora', $r->ide)->first();
+        if(is_null($editora)){
+            return redirect()->route('editoras.index')
+                ->with('msg', 'A editora não existe');
+        }
+        else
+        {
+            $editora->delete();
+            return redirect()->route('editoras.index')->with('msg','Editora eliminada!');
+            
+        }
+    }
+        
 }

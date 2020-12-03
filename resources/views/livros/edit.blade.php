@@ -34,10 +34,18 @@ Imagem_capa: <input type="text" name="imagem_capa" value="{{$livro->imagem_capa}
 IMAGEM CAPA inválida<br><br>
 @endif
     
-Género: <input type="text" name="id_genero" value="{{$livro->id_genero}}"><br>
+Género: <select name="id_genero">
+@foreach ($generos as $genero)
+    <option value ="{{$genero->id_genero}}"
+        @if($genero->id_genero==$livro->id_genero)selected @endif
+        >{{$genero->designacao}}</option>
+    @endforeach
+    </select>
 @if($errors->has('genero'))
 GENERO inválido<br><br>
-@endif
+@endif<br>
+    
+    
     
 Autor: <input type="text" name="id_autor" value="{{$livro->id_autor}}"><br>
 @if($errors->has('autor'))

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Livro;
+use App\Models\Genero;
 
 class LivrosController extends Controller
 {
@@ -26,8 +27,9 @@ class LivrosController extends Controller
         
     }
      public function create(){
-            return view('livros.create');
-        }
+        $generos = Genero::all();
+        return view('livros.create',['generos'=>$generos]);
+    }
     public function store(Request $r){
         //$novoLivro=$r->all();
         //dd($novoLivro);
@@ -52,13 +54,17 @@ class LivrosController extends Controller
         ]);
     }
     public function edit(Request $request){
+        $generos = Genero::all();
+
          $idLivro=$request->id;
         
-        $livro=Livro::where('id_livro', $idLivro)-first();
+        $livro=Livro::where('id_livro', $idLivro)->first();
         
         return view('livros.edit', [
-            'livro'=>$livro
+            'livro'=>$livro,
+            'generos'=>$generos
         ]);
+        
     }
     
     public function update(Request $request){
@@ -89,7 +95,7 @@ class LivrosController extends Controller
         }
         else
         {
-          return view('livros.delete',['livros=>$livro']);  
+          return view('livros.delete',['livro'=>$livro]);  
         }
     }
     public function destroy(Request $r){
@@ -105,5 +111,7 @@ class LivrosController extends Controller
             
         }
     }
+    
+    
     
 }

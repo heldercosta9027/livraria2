@@ -32,10 +32,14 @@ Imagem_capa: <input type="text" name="imagem_capa" value="{{old('imagem_capa')}}
 IMAGEM CAPA inválida<br><br>
 @endif
     
-Género: <input type="text" name="id_genero" value="{{old('genero')}}"><br>
+Género: <select name="id_genero">
+@foreach ($generos as $genero)
+    <option value ="{{$genero->id_genero}}">{{$genero->designacao}}</option>
+@endforeach
+</select>
 @if($errors->has('genero'))
 GENERO inválido<br><br>
-@endif
+@endif<br>
     
 Autor: <input type="text" name="id_autor" value="{{old('autor')}}"><br>
 @if($errors->has('autor'))
