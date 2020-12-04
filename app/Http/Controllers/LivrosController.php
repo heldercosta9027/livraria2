@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Livro;
 use App\Models\Genero;
+use App\Models\Autor;  
+use App\Models\Editora; 
 
 class LivrosController extends Controller
 {
@@ -28,12 +30,15 @@ class LivrosController extends Controller
     }
      public function create(){
         $generos = Genero::all();
-        return view('livros.create',['generos'=>$generos]);
+        $autores = Autor::all();
+        $editoras = Editora::all();
+        return view('livros.create',['generos'=>$generos,'autores'=>$autores, 'editoras'=>$editoras]);
     }
     public function store(Request $r){
         //$novoLivro=$r->all();
         //dd($novoLivro);
         
+    
         $novoLivro = $r->validate([
             'titulo'=>['required', 'min:3','max:100'],
             'idioma'=>['nullable', 'min:3', 'max:20'],
@@ -46,25 +51,36 @@ class LivrosController extends Controller
             'id_autor'=>['numeric','nullable'],
             'sinopse'=>['nullable', 'min:3', 'max:255'] 
         ]);
-        $livro = Livro::create($novoLivro);
+        $autores = $request->id_autor;
+        $editoras = $request->id_editora;
         
+        
+        $livro = Livro::create($novoLivro);
+        $livro->autores()->attach($autores);
+        $livro->editoras()->attach($editoras);
         
         return redirect()->route('livros.show', [
             'id'=>$livro->id_livro
-        ]);
+        ]); 
     }
     public function edit(Request $request){
+        $idLivro=$request->id;
         $generos = Genero::all();
-
-         $idLivro=$request->id;
-        
-        $livro=Livro::where('id_livro', $idLivro)->first();
-        
-        return view('livros.edit', [
-            'livro'=>$livro,
-            'generos'=>$generos
-        ]);
-        
+        $autores = Autor::all();
+        $editoras = Editora::all();
+        $livro = Livro::where('id_livro',$idLivro)->with(['autores','editoras'])->first();
+        $autoresLivro =[];
+        $editorasLivro =[];
+        foreach($livro->autores as $autor){
+            $autoresLivro[] = $autor->id_autor;
+        }
+        return view('livros.create',
+                    ['generos'=>$generos,              
+                     'autores'=>$autores,
+                     'editoras'=>$editoras,
+                     'autoresLivro'=>$autoresLivro,
+                     'editorasLivro'=>$editorasLivro
+                    ]);   
     }
     
     public function update(Request $request){
@@ -82,7 +98,13 @@ class LivrosController extends Controller
             'id_autor'=>['numeric','nullable'],
             'sinopse'=>['nullable', 'min:3', 'max:255'] 
         ]);
+        $editoras=$req->id_editora;
+        $autores=$req->id_autor;
+        
         $livro->update($atualizarLivro);
+        $livro->autores()->sync($autores);
+        $livro->editoras()->sync($editoras);
+        
         return redirect()->route('livros.show', [
             'id'=>$livro->id_livro
             ]);
@@ -99,7 +121,16 @@ class LivrosController extends Controller
         }
     }
     public function destroy(Request $r){
+       
+        
         $livro = Livro::where ('id_livro', $r->id)->first();
+        $idLivro = $request_>id;
+        $livro = Livro::findOrFail($idLivro->autores);
+        $livro = Livro::findOrFail($idLivro->editoras);
+        $livro->autores()->detach($autoresLivro);
+        $livro->editoras()->detach($editorasLivro);
+        
+        $livro->delete();
         if(is_null($livro)){
             return redirect()->route('livros.index')
                 ->with('msg', 'O livro não existe');

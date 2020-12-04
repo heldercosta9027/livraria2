@@ -41,10 +41,26 @@ Género: <select name="id_genero">
 GENERO inválido<br><br>
 @endif<br>
     
-Autor: <input type="text" name="id_autor" value="{{old('autor')}}"><br>
+Autor(es): <select name="id_autor[]" multiple="multiple">
+@foreach ($autores as $autor)
+<option value="{{$autor->id_autor}}">{{$autor->nome}}</option> 
+@endforeach
+</select>   
 @if($errors->has('autor'))
-AUTOR inválido<br><br>
+AUTOR inválido
 @endif
+<br>   
+Sinopse: <textarea type="text" name="sinopse"></textarea><br>
+    
+Editoras(as): <select name="id_editora[]" multiple="multiple">
+@foreach ($editoras as $editora)
+<option value="{{$editora->id_editora}}">{{$editora->nome}}</option> 
+@endforeach
+</select>   
+@if($errors->has('editora'))
+Editora inválida
+@endif
+<br>  
     
 Sinopse: <textarea type="text" name="sinopse"></textarea><br>
     
