@@ -38,6 +38,8 @@ class LivrosController extends Controller
         //$novoLivro=$r->all();
         //dd($novoLivro);
         
+        
+        
     
         $novoLivro = $r->validate([
             'titulo'=>['required', 'min:3','max:100'],
@@ -51,8 +53,8 @@ class LivrosController extends Controller
             'id_autor'=>['numeric','nullable'],
             'sinopse'=>['nullable', 'min:3', 'max:255'] 
         ]);
-        $autores = $request->id_autor;
-        $editoras = $request->id_editora;
+        $autores = $r->id_autor;
+        $editoras = $r->id_editora;
         
         
         $livro = Livro::create($novoLivro);
@@ -61,7 +63,12 @@ class LivrosController extends Controller
         
         return redirect()->route('livros.show', [
             'id'=>$livro->id_livro
-        ]); 
+        ]);
+        
+        if(Auth::check()){
+            $userAtual = Auth::user()->id;
+            $livro['id_user']=$userAtual;
+        }
     }
     public function edit(Request $request){
         $idLivro=$request->id;

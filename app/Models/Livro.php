@@ -21,6 +21,7 @@ class Livro extends Model
         'imagem_capa',
         'id_genero',
         'id_autor',
+        'id_user',
         'sinopse'
     ];
     

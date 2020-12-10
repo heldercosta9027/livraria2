@@ -12,5 +12,8 @@ Livraria
 </a></li>
 @endforeach
 </ul>
+
+@if(auth()->check())
 <a href="{{route('autores.create')}}" class="btn btn-info" role="button">Novo Autor</a>
+@endif
 @endsection
