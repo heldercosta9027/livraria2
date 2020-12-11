@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Auth;
 use App\Models\Livro;
 use App\Models\Genero;
 use App\Models\Autor;  
 use App\Models\Editora; 
+use App\Models\User; 
 
 class LivrosController extends Controller
 {
@@ -22,7 +24,7 @@ class LivrosController extends Controller
         $idLivro = $request->id;
         //$livro=Livro::findOrFail($idLivro);
         //$livro=Livro::find($idLivro);
-        $livro=Livro::where('id_livro',$idLivro)->with(['genero','autores','editoras'])->first();
+        $livro=Livro::where('id_livro',$idLivro)->with(['genero','autores','editoras','users'])->first();
         return view('livros.show',[
             'livro'=>$livro
         ]);
@@ -56,6 +58,10 @@ class LivrosController extends Controller
         $autores = $r->id_autor;
         $editoras = $r->id_editora;
         
+        if(Auth::check()){
+            $userAtual = Auth::user()->id;
+         $novoLivro['id_user']=$userAtual;
+        }
         
         $livro = Livro::create($novoLivro);
         $livro->autores()->attach($autores);
@@ -65,10 +71,7 @@ class LivrosController extends Controller
             'id'=>$livro->id_livro
         ]);
         
-        if(Auth::check()){
-            $userAtual = Auth::user()->id;
-            $livro['id_user']=$userAtual;
-        }
+        
     }
     public function edit(Request $request){
         $idLivro=$request->id;
@@ -87,7 +90,12 @@ class LivrosController extends Controller
                      'editoras'=>$editoras,
                      'autoresLivro'=>$autoresLivro,
                      'editorasLivro'=>$editorasLivro
-                    ]);   
+                    ]); 
+        if(isset($livro->users->id_user)){
+            if(Auth::user()->id==$livro->users->id_user){
+                return view('livros.edit',['livro'=>livro,'generos'=>$genero,'autores'=>$autores,'editoras'=>$editoras,'autoresLivro'=>$autoresLivro,'editorasLivro'=>$editorasLivro]);
+            }
+        }
     }
     
     public function update(Request $request){
@@ -131,7 +139,7 @@ class LivrosController extends Controller
        
         
         $livro = Livro::where ('id_livro', $r->id)->first();
-        $idLivro = $request_>id;
+        $idLivro = $r->id;
         $livro = Livro::findOrFail($idLivro->autores);
         $livro = Livro::findOrFail($idLivro->editoras);
         $livro->autores()->detach($autoresLivro);

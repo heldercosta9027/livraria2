@@ -42,12 +42,26 @@ Created_at:{{$livro->created_at}}<br>
 Updated_at:{{$livro->updated_at}}<br>
 Deleted_at:{{$livro->deleted_at}}
 </ul>
+@if(isset($livro->id_user))
+    Utilizador: {{$livro->users->name}}<br>
+@else
+<diV class="alert alert-danger" role="alert">
+        Sem o Utilizador definido
+        </div>
+@endif
+
+    
+
+
 @if(auth()->check())
-
-
-
-
+@if(auth()->user()->id==$livro->id_user)
 <a href="{{route('livros.edit',['id'=>$livro->id_livro])}}" class="btn btn-info" role="button">Editar Livro</a>
 <a href="{{route('livros.delete',['id'=>$livro->id_livro])}}" class="btn btn-info" role="button">
 Eliminar Livro</a>
+@endif
+@if(is_null($livro->id_user))
+<a href="{{route('livros.edit',['id'=>$livro->id_livro])}}" class="btn btn-info" role="button">Editar Livro</a>
+<a href="{{route('livros.delete',['id'=>$livro->id_livro])}}" class="btn btn-info" role="button">
+Eliminar Livro</a>
+@endif
 @endif
