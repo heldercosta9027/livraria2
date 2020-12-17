@@ -15,6 +15,7 @@ class EditorasController extends Controller
             'editoras'=>$editoras
         ]);
     }
+    
     public function show(Request $request){
         $idEditora = $request->ide;
         //$editora=Editora::findOrFail($idEditora);
@@ -24,36 +25,41 @@ class EditorasController extends Controller
             'editora'=>$editora
         ]);
     }
+    
     public function create(){
+        if (Gate::allows('admin')){
             return view('editoras.create');
         }
+    }
+    
     public function store(Request $r){
         //$novoLivro=$r->all();
         //dd($novoLivro);
-        
-        $novoEditora = $r->validate([
-            'nome'=>['required', 'min:3','max:100'],
-            'morada'=>['nullable', 'min:1', 'max:255'],
-            'observacoes'=>['nullable', 'min:1', 'max:255']
+        if (Gate::allows('admin')){
+            $novoEditora = $r->validate([
+                'nome'=>['required', 'min:3','max:100'],
+                'morada'=>['nullable', 'min:1', 'max:255'],
+                'observacoes'=>['nullable', 'min:1', 'max:255']
         ]);
-        $editora = Editora::create($novoEditora);
-        
-        
+            $editora = Editora::create($novoEditora);
         return redirect()->route('editoras.show', [
             'ide'=>$editora->id_editora
         ]);
+      }
     }
+    
     public function edit(Request $request){
-         $idEditora=$request->ide;
-        
+        if(Gate::allows('admin')){
+        $idEditora=$request->ide;
         $editora=Editora::where('id_editora', $idEditora)->first();
-        
         return view('editoras.edit', [
             'editora'=>$editora
         ]);
+      }
     }
     
     public function update(Request $request){
+          if (Gate::allows('admin')){
           $idEditora=$request->ide;
           $editora=Editora::where('id_editora',$idEditora)->first();
           $atualizarEditora = $request->validate([
@@ -65,29 +71,33 @@ class EditorasController extends Controller
         return redirect()->route('editoras.show', [
             'ide'=>$editora->id_editora
             ]);
+        }
     }
     public function delete(Request $r){
-        $editora = Editora::where ('id_editora', $r->ide)->first();
-        if(is_null($editora)){
-            return redirect()->route('editoras.index')
-                ->with('msg', 'A editora não existe');
-        }
-        else
-        {
-          return view('editoras.delete',['editora'=>$editora]);  
+        if (Gate::allows('admin')){
+            $editora = Editora::where ('id_editora', $r->ide)->first();
+                if(is_null($editora)){
+                    return redirect()->route('editoras.index')
+                        ->with('msg', 'A editora não existe');
+                    }
+            else
+            {
+            return view('editoras.delete',['editora'=>$editora]);  
+            }
         }
     }
     public function destroy(Request $r){
-        $editora = Editora::where ('id_editora', $r->ide)->first();
-        if(is_null($editora)){
-            return redirect()->route('editoras.index')
-                ->with('msg', 'A editora não existe');
-        }
-        else
-        {
-            $editora->delete();
-            return redirect()->route('editoras.index')->with('msg','Editora eliminada!');
-            
+        if(Gate::allows('admin')){
+            $editora = Editora::where ('id_editora', $r->ide)->first();
+                if(is_null($editora)){
+                    return redirect()->route('editoras.index')
+                        ->with('msg', 'A editora não existe');
+                    }
+         else
+                {
+                $editora->delete();
+                return redirect()->route('editoras.index')->with('msg','Editora eliminada!');  
+                }
         }
     }
         

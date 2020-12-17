@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Auth;
 use App\Models\Livro;
 use App\Models\Genero;
@@ -31,36 +32,36 @@ class LivrosController extends Controller
         
     }
      public function create(){
-        $generos = Genero::all();
-        $autores = Autor::all();
-        $editoras = Editora::all();
+        if(Gate::allows('admin')){
+            $generos = Genero::all();
+            $autores = Autor::all();
+            $editoras = Editora::all();
         return view('livros.create',['generos'=>$generos,'autores'=>$autores, 'editoras'=>$editoras]);
+        } 
     }
+        
     public function store(Request $r){
         //$novoLivro=$r->all();
         //dd($novoLivro);
-        
-        
-        
-    
-        $novoLivro = $r->validate([
-            'titulo'=>['required', 'min:3','max:100'],
-            'idioma'=>['nullable', 'min:3', 'max:20'],
-            'total_paginas'=>['nullable', 'numeric', 'min:1'],
-            'data_edicao'=>['nullable','date'],
-            'isbn'=>['required', 'min:1', 'max:13'],
-            'observacoes'=>['nullable', 'min:1', 'max:255'],
-            'imagem_capa'=>['nullable'],
-            'id_genero'=>['numeric', 'nullable'],
-            'id_autor'=>['numeric','nullable'],
-            'sinopse'=>['nullable', 'min:3', 'max:255'] 
+        if(Gate::allows('admin')){
+            $novoLivro = $r->validate([
+                'titulo'=>['required', 'min:3','max:100'],
+                'idioma'=>['nullable', 'min:3', 'max:20'],
+                'total_paginas'=>['nullable', 'numeric', 'min:1'],
+                'data_edicao'=>['nullable','date'],
+                'isbn'=>['required', 'min:1', 'max:13'],
+                'observacoes'=>['nullable', 'min:1', 'max:255'],
+                'imagem_capa'=>['nullable'],
+                'id_genero'=>['numeric', 'nullable'],
+                'id_autor'=>['numeric','nullable'],
+                'sinopse'=>['nullable', 'min:3', 'max:255'] 
         ]);
-        $autores = $r->id_autor;
-        $editoras = $r->id_editora;
+            $autores = $r->id_autor;
+            $editoras = $r->id_editora;
         
         if(Auth::check()){
             $userAtual = Auth::user()->id;
-         $novoLivro['id_user']=$userAtual;
+            $novoLivro['id_user']=$userAtual;
         }
         
         $livro = Livro::create($novoLivro);
@@ -70,48 +71,49 @@ class LivrosController extends Controller
         return redirect()->route('livros.show', [
             'id'=>$livro->id_livro
         ]);
-        
-        
+      }
     }
     public function edit(Request $request){
         $idLivro=$request->id;
-        $generos = Genero::all();
-        $autores = Autor::all();
-        $editoras = Editora::all();
         $livro = Livro::where('id_livro',$idLivro)->with(['autores','editoras'])->first();
-        $autoresLivro =[];
-        $editorasLivro =[];
+        if (Gate::allows('atualizar.livro',$livro)|| Gate::allows('admin')){
+            $autoresLivro =[];
+            $editorasLivro =[];
+            $generos = Genero::all();
+            $autores = Autor::all();
+            $editoras = Editora::all();
         foreach($livro->autores as $autor){
             $autoresLivro[] = $autor->id_autor;
         }
-        return view('livros.create',
+        return view('livros.edit',
                     ['generos'=>$generos,              
                      'autores'=>$autores,
                      'editoras'=>$editoras,
                      'autoresLivro'=>$autoresLivro,
                      'editorasLivro'=>$editorasLivro
-                    ]); 
-        if(isset($livro->users->id_user)){
-            if(Auth::user()->id==$livro->users->id_user){
-                return view('livros.edit',['livro'=>livro,'generos'=>$genero,'autores'=>$autores,'editoras'=>$editoras,'autoresLivro'=>$autoresLivro,'editorasLivro'=>$editorasLivro]);
-            }
+                    ]);
+        }
+        else{
+            return redirect()->route('livros.index')
+                ->with('msg','Não tem permissão para aceder à área pretendida.');
         }
     }
     
     public function update(Request $request){
           $idLivro=$request->id;
           $livro=Livro::where('id_livro',$idLivro)->first();
-          $atualizarLivro = $request->validate([
-            'titulo'=>['required', 'min:3','max:100'],
-            'idioma'=>['nullable', 'min:3', 'max:20'],
-            'total_paginas'=>['nullable', 'numeric', 'min:1'],
-            'data_edicao'=>['nullable','date'],
-            'isbn'=>['required', 'min:1', 'max:13'],
-            'observacoes'=>['nullable', 'min:1', 'max:255'],
-            'imagem_capa'=>['nullable'],
-            'id_genero'=>['numeric', 'nullable'],
-            'id_autor'=>['numeric','nullable'],
-            'sinopse'=>['nullable', 'min:3', 'max:255'] 
+          if(Gate::allows('admin')){
+            $atualizarLivro = $request->validate([
+                'titulo'=>['required', 'min:3','max:100'],
+                'idioma'=>['nullable', 'min:3', 'max:20'],
+                'total_paginas'=>['nullable', 'numeric', 'min:1'],
+                'data_edicao'=>['nullable','date'],
+                'isbn'=>['required', 'min:1', 'max:13'],
+                'observacoes'=>['nullable', 'min:1', 'max:255'],
+                'imagem_capa'=>['nullable'],
+                'id_genero'=>['numeric', 'nullable'],
+                'id_autor'=>['numeric','nullable'],
+                'sinopse'=>['nullable', 'min:3', 'max:255'] 
         ]);
         $editoras=$req->id_editora;
         $autores=$req->id_autor;
@@ -123,27 +125,29 @@ class LivrosController extends Controller
         return redirect()->route('livros.show', [
             'id'=>$livro->id_livro
             ]);
+        }
     }
     public function delete(Request $r){
         $livro = Livro::where ('id_livro', $r->id)->first();
-        if(is_null($livro)){
-            return redirect()->route('livros.index')
-                ->with('msg', 'O livro não existe');
+        if(Gate::allows('admin')){
+            if(is_null($livro)){
+                return redirect()->route('livros.index')
+                    ->with('msg', 'O livro não existe');
         }
         else
         {
           return view('livros.delete',['livro'=>$livro]);  
         }
+      }
     }
     public function destroy(Request $r){
-       
-        
         $livro = Livro::where ('id_livro', $r->id)->first();
-        $idLivro = $r->id;
-        $livro = Livro::findOrFail($idLivro->autores);
-        $livro = Livro::findOrFail($idLivro->editoras);
-        $livro->autores()->detach($autoresLivro);
-        $livro->editoras()->detach($editorasLivro);
+        if(Gate::allows('admin')){
+            $idLivro = $r->id;
+            $livro = Livro::findOrFail($idLivro->autores);
+            $livro = Livro::findOrFail($idLivro->editoras);
+            $livro->autores()->detach($autoresLivro);
+            $livro->editoras()->detach($editorasLivro);
         
         $livro->delete();
         if(is_null($livro)){
@@ -156,6 +160,17 @@ class LivrosController extends Controller
             return redirect()->route('livros.index')->with('msg','Livro eliminado!');
             
         }
+      }
+    }
+    
+    public function likes(request $r){
+        $idLivro = $r->id;
+        
+        $novoLike['id_livro'] = $idLivro;
+        $novoLike['id_user'] = auth::user()->id;
+            
+       
+        
     }
     
     

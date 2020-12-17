@@ -65,3 +65,8 @@ Eliminar Livro</a>
 Eliminar Livro</a>
 @endif
 @endif
+@if(auth()->check())
+@if(auth()->user()->id==$livro->id_user)
+<a href="{{route('livros.like',['id'=>$livro->id_livro])}}" class="btn btn-info" role="button">Editar Livro</a>
+@endif
+@endif
