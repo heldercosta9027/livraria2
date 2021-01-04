@@ -54,19 +54,17 @@ Deleted_at:{{$livro->deleted_at}}
 
 
 @if(auth()->check())
-@if(auth()->user()->id==$livro->id_user)
-<a href="{{route('livros.edit',['id'=>$livro->id_livro])}}" class="btn btn-info" role="button">Editar Livro</a>
-<a href="{{route('livros.delete',['id'=>$livro->id_livro])}}" class="btn btn-info" role="button">
-Eliminar Livro</a>
+@if(auth()->user()->id==$livro->id_user || Gate::allows('admin'))
+<a href="{{route('livros.edit',['id'=>$livro->id_livro])}}" class="btn btn-info" role="button"> Editar Livro </a>
+<a href="{{route('livros.delete',['id'=>$livro->id_livro])}}" class="btn btn-info" role="button"> Eliminar Livro </a>
 @endif
-@if(is_null($livro->id_user))
-<a href="{{route('livros.edit',['id'=>$livro->id_livro])}}" class="btn btn-info" role="button">Editar Livro</a>
-<a href="{{route('livros.delete',['id'=>$livro->id_livro])}}" class="btn btn-info" role="button">
-Eliminar Livro</a>
+@if(is_null($livro->id_user) || Gate::allows ('admin'))
+<a href="{{route('livros.edit',['id'=>$livro->id_livro])}}" class="btn btn-info" role="button"> Editar Livro </a>
+<a href="{{route('livros.delete',['id'=>$livro->id_livro])}}" class="btn btn-info" role="button"> Eliminar Livro </a>
 @endif
 @endif
 @if(auth()->check())
-@if(auth()->user()->id==$livro->id_user)
+@if(auth()->user()->id==$livro->id_user || Gate::allows ('admin')) 
 <a href="{{route('livros.like',['id'=>$livro->id_livro])}}" class="btn btn-info" role="button">Editar Livro</a>
 @endif
 @endif

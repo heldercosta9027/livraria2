@@ -25,12 +25,14 @@ class GenerosController extends Controller
         ]);
     }
     public function create(){
+        if(Gate::allows('admin')){
             return view('generos.create');
         }
+    }
     public function store(Request $r){
         //$novoLivro=$r->all();
         //dd($novoLivro);
-        
+        if(Gate::allows('admin')){
         $novoGenero = $r->validate([
             'designacao'=>['required', 'min:3','max:100'],
             'observacoes'=>['nullable', 'min:1', 'max:255']
@@ -41,20 +43,22 @@ class GenerosController extends Controller
         return redirect()->route('generos.show', [
             'idg'=>$genero->id_genero
         ]);
+      }
     }
     public function edit(Request $request){
-         $idGenero=$request->idg;
-        
+        $idGenero=$request->idg;
+        if(Gate::allows('admin')){
         $genero=Genero::where('id_genero', $idGenero)->first();
-        
         return view('generos.edit', [
             'genero'=>$genero
         ]);
+      }
     }
     
     public function update(Request $request){
           $idGenero=$request->idg;
           $genero=Genero::where('id_genero',$idGenero)->first();
+          if(Gate::allows('admin')){
           $atualizarGenero = $request->validate([
           'designacao'=>['required', 'min:3','max:100'],
           'observacoes'=>['nullable', 'min:1', 'max:255']  
@@ -63,9 +67,11 @@ class GenerosController extends Controller
         return redirect()->route('generos.show', [
             'idg'=>$genero->id_genero
             ]);
+          }
     }
     public function delete(Request $r){
         $genero = Genero::where ('id_genero', $r->idg)->first();
+        if(Gate::allows('admin')){
         if(is_null($genero)){
             return redirect()->route('generos.index')
                 ->with('msg', 'A generos não existe');
@@ -74,9 +80,11 @@ class GenerosController extends Controller
         {
           return view('generos.delete',['genero'=>$genero]);  
         }
+      }
     }
     public function destroy(Request $r){
         $genero = Genero::where ('id_genero', $r->idg)->first();
+        if(Gate::allows('admin')){
         if(is_null($genero)){
             return redirect()->route('generos.index')
                 ->with('msg', 'O genero não existe');
