@@ -1,4 +1,4 @@
-<form action="{{route('livros.store')}}"method="post">
+<form action="{{route('livros.store')}}" enctype="multipart/form-data" method="post">
 @csrf
     
 Título: <input type="text" name="titulo" value="{{old('titulo')}}" ><br>
@@ -27,7 +27,8 @@ Deverá indicar um ISBN correto(13 carateres)<br><br>
 @endif
     
 Observações: <textarea type="text" name="observacoes"></textarea><br>
-Imagem_capa: <input type="text" name="imagem_capa" value="{{old('imagem_capa')}}"><br>
+    
+Imagem_capa: <input type="file" name="imagem_capa" value="{{old('imagem_capa')}}"><br>
 @if($errors->has('imagem_capa'))
 IMAGEM CAPA inválida<br><br>
 @endif

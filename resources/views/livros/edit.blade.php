@@ -1,4 +1,4 @@
-<form action="{{route('livros.update',['id'=>$livro->id_livro])}} "method="post">
+<form action="{{route('livros.update',['id'=>$livro->id_livro])}}" enctype="multipart/form-data" method="post">
 @csrf
     @method('patch')    
     
@@ -29,7 +29,7 @@ Deverá indicar um ISBN correto(13 carateres)<br><br>
     
 Observações: <textarea type="text" name="observacoes">{{$livro->observacoes}}</textarea><br>
     
-Imagem_capa: <input type="text" name="imagem_capa" value="{{$livro->imagem_capa}}"><br>
+Imagem_capa: <input type="file" name="imagem_capa" value="{{$livro->imagem_capa}}"><br>
 @if($errors->has('imagem_capa'))
 IMAGEM CAPA inválida<br><br>
 @endif
@@ -71,6 +71,11 @@ Editora inválida
 <br>  
     
 Sinopse: <textarea type="text" name="sinopse">{{$livro->sinopse}}</textarea><br>
+
+Sinopse(ficheiro PDF): <input type="file" name="ficheiro_sinopse" value="{{$livro->ficheiro_sinopse}}"><br>
+@if($errors->has('ficheiro_sinopse'))
+FICHEIRO PDF inválido<br><br>
+@endif
     
 <input type="submit" value="enviar">
 </form>

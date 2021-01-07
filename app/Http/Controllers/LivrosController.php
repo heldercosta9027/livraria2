@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Auth;
 use App\Models\Livro;
 use App\Models\Genero;
@@ -51,14 +52,36 @@ class LivrosController extends Controller
                 'data_edicao'=>['nullable','date'],
                 'isbn'=>['required', 'min:1', 'max:13'],
                 'observacoes'=>['nullable', 'min:1', 'max:255'],
-                'imagem_capa'=>['nullable'],
+                'imagem_capa'=>['image','nullable', 'max:2000'],
                 'id_genero'=>['numeric', 'nullable'],
                 'id_autor'=>['numeric','nullable'],
-                'sinopse'=>['nullable', 'min:3', 'max:255'] 
+                'sinopse'=>['nullable', 'min:3', 'max:255'],
+                'ficheiro_sinopse'=>['file','mimes:pdf','max:2000']
         ]);
+            
+        if($r->hasFile('imagem_capa')){
+             $nomeImagem = $r->file('imagem_capa')->getClientOriginalName();
+             $nomeImagem = time(). '_' .$nomeImagem; 
+             $guardarImagem=$r->file('imagem_capa')->storeAs('imagem/livros',$nomeImagem);
+             
+             
+             $novoLivro['imagem_capa'] = $nomeImagem;
+         }
+        
+        if($r->hasFile('ficheiro_sinopse')){
+         $nomeFicherio = $r->file('ficheiro_sinopse')->getClientOriginalName();
+         $nomeFicheiro = time(). '_' .$nomeFicheiro; 
+         $guardarFicheiro=$r->file('ficehiro_sinopse')->storeAs('ficheirosPdf/livros',$nomeFicheiros);
+             
+             
+             $novoLivro['ficehiro_sinopse'] = $nomeFicheiro;
+         }
+           
             $autores = $r->id_autor;
             $editoras = $r->id_editora;
         
+            
+            
         if(Auth::check()){
             $userAtual = Auth::user()->id;
             $novoLivro['id_user']=$userAtual;
@@ -90,7 +113,8 @@ class LivrosController extends Controller
                      'autores'=>$autores,
                      'editoras'=>$editoras,
                      'autoresLivro'=>$autoresLivro,
-                     'editorasLivro'=>$editorasLivro
+                     'editorasLivro'=>$editorasLivro,
+                     'livro'=>$livro
                     ]);
         }
         else{
@@ -102,6 +126,7 @@ class LivrosController extends Controller
     public function update(Request $request){
           $idLivro=$request->id;
           $livro=Livro::where('id_livro',$idLivro)->first();
+          $imagemAntiga = $livro->imagem_capa;
           if(Gate::allows('admin')){
             $atualizarLivro = $request->validate([
                 'titulo'=>['required', 'min:3','max:100'],
@@ -110,13 +135,40 @@ class LivrosController extends Controller
                 'data_edicao'=>['nullable','date'],
                 'isbn'=>['required', 'min:1', 'max:13'],
                 'observacoes'=>['nullable', 'min:1', 'max:255'],
-                'imagem_capa'=>['nullable'],
+                'imagem_capa'=>['image','nullable', 'max:2000'],
                 'id_genero'=>['numeric', 'nullable'],
                 'id_autor'=>['numeric','nullable'],
-                'sinopse'=>['nullable', 'min:3', 'max:255'] 
+                'sinopse'=>['nullable', 'min:3', 'max:255'],
+                'ficheiro_sinopse'=>['file','mimes:pdf','max:2000']
+                
         ]);
-        $editoras=$req->id_editora;
-        $autores=$req->id_autor;
+        
+        if($request->hasFile('imagem_capa')){
+             $nomeImagem = $request->file('imagem_capa')->getClientOriginalName();
+             $nomeImagem = time(). '_' .$nomeImagem; 
+             $guardarImagem=$request->file('imagem_capa')->storeAs('imagem/livros',$nomeImagem);
+             
+             if(!is_null($imagemAntiga)){
+                 Storage::Delete('imagem/livros/'.$imagemAntiga);
+             }
+             
+             $atualizarLivro['imagem_capa'] = $nomeImagem;
+         }   
+              
+        if($request->hasFile('ficheiro_sinopse')){
+             $nomeFicheiro = $request->file('ficheiro_sinopse')->getClientOriginalName();
+             $nomeFicheiro = time(). '_' .$nomeFicheiro; 
+             $guardarFicheiro=$request->file('ficheiro_sinopse')->storeAs('ficheiroPdf/livros',$nomeFicheiro);
+             
+             if(!is_null($FicheiroAntigo)){
+                 Storage::Delete('ficheiroPdf/livros/'.$FicheiroAntigo);
+             }
+             
+             $atualizarLivro['ficheiro_sinopse'] = $nomeFicheiro;
+         }
+              
+        $editoras=$request->id_editora;
+        $autores=$request->id_autor;
         
         $livro->update($atualizarLivro);
         $livro->autores()->sync($autores);
